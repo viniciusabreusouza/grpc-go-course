@@ -6,6 +6,7 @@ import (
 
 	pb "github.com/viniciusabreusouza/grpc-go-course/greet/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type Server struct {
@@ -22,7 +23,24 @@ func main() {
 
 	log.Printf("Server is listening on %s", addr)
 
-	s := grpc.NewServer()
+	opts := []grpc.ServerOption{}
+	tls := false // Set to true if you want to use TLS
+
+	if tls {
+		// Load TLS credentials here if needed
+		log.Println("TLS is enabled, but not implemented in this example")
+		certFile := "ssl/server.crt"
+		keyFile := "ssl/server.key"
+		creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+
+		if err != nil {
+			log.Fatalf("Failed to load TLS credentials: %v", err)
+		}
+
+		opts = append(opts, grpc.Creds(creds))
+	}
+
+	s := grpc.NewServer(opts...)
 	pb.RegisterGreetServiceServer(s, &Server{})
 
 	if err := s.Serve(lis); err != nil {
